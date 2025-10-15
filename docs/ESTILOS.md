@@ -1,168 +1,104 @@
-# Guía de Estilos - MIDDAS E-commerce Template
-
-Esta guía explica cómo trabajar con los estilos en el proyecto, incluyendo el sistema de colores dinámicos, tipografía y mejores prácticas para mantener una interfaz coherente y legible.
-
----
-
-## Tabla de Contenidos
-
-1. [Sistema de Colores](#sistema-de-colores)
-2. [Tipografía y Colores de Texto](#tipografía-y-colores-de-texto)
-3. [Contraste y Legibilidad](#contraste-y-legibilidad)
-4. [Clases de Tailwind CSS](#clases-de-tailwind-css)
-5. [Componentes y Estilos](#componentes-y-estilos)
-6. [Mejores Prácticas](#mejores-prácticas)
-
----
+# Guía de Estilos - E-commerce Template
 
 ## Sistema de Colores
 
-### Configuración de Colores
+### Configuración
 
-Los colores se definen en `public/config/store-config.json` dentro del objeto `branding.colorScheme`:
+Colores en `public/config/store-config.json`:
 
 ```json
 "colorScheme": {
   "name": "fresh",
-  "primary": "#0066CC",      // Color principal (botones, links, elementos interactivos)
-  "secondary": "#FFFFFF",    // Color secundario (fondos, tarjetas)
-  "accent": "#00B4D8",       // Color de acento (destacados, badges)
-  "background": "#F0F7FF"    // Color de fondo general del sitio
+  "primary": "#0066CC",
+  "secondary": "#FFFFFF",
+  "accent": "#00B4D8",
+  "background": "#F0F7FF"
 }
 ```
 
-### Formato de Colores
-
-- **Entrada**: Colores en formato **HEX** (`#RRGGBB`)
-- **Procesamiento**: Conversión automática a **OKLCH** (espacio de color moderno)
-- **Aplicación**: Variables CSS que usa Tailwind
+**Formato**:
+- Entrada: HEX (`#RRGGBB`)
+- Procesamiento: Conversión a OKLCH automática
+- Aplicación: Variables CSS para Tailwind
 
 ### Variables CSS Generadas
 
-El sistema genera automáticamente estas variables CSS:
-
 ```css
 :root {
-  --background         /* Color de fondo del sitio */
-  --foreground         /* Color de texto principal */
-  --primary            /* Color principal de la marca */
-  --primary-foreground /* Texto sobre color principal */
+  --background         /*  Fondo del sitio */
+  --foreground         /* Texto principal */
+  --primary            /* Color principal */
+  --primary-foreground /* Texto sobre primary */
   --secondary          /* Color secundario */
-  --secondary-foreground /* Texto sobre color secundario */
   --accent             /* Color de acento */
-  --accent-foreground  /* Texto sobre color de acento */
-  --muted-foreground   /* Texto secundario/deshabilitado */
+  --muted-foreground   /* Texto secundario */
 }
 ```
 
-### Cómo Funciona la Conversión
+### Conversión HEX → OKLCH
 
-El archivo `lib/color-utils.ts` se encarga de:
+El archivo `lib/color-utils.ts` convierte automáticamente:
+1. HEX → RGB → XYZ → OKLCH
+2. Calcula contraste para texto legible
 
-1. **Convertir HEX a RGB**: Parsea el color hexadecimal
-2. **RGB a XYZ**: Transforma al espacio de color CIE XYZ
-3. **XYZ a OKLCH**: Convierte al espacio OKLCH (Lightness, Chroma, Hue)
-4. **Calcular contraste**: Determina automáticamente si el texto debe ser claro u oscuro
-
-#### Ejemplo de Conversión
-
+**Ejemplo**:
 ```
-Input:  #0066CC (azul)
-Output: oklch(0.543 0.156 251.234)
-        ↓       ↓     ↓
-        L       C     H
-   (Luminosidad)(Saturación)(Tono)
+#0066CC → oklch(0.543 0.156 251.234)
+             ↓      ↓       ↓
+         Lightness Chroma Hue
 ```
 
 ---
 
-## Tipografía y Colores de Texto
+## Tipografía
 
-### Configuración de Tipografía
-
-La tipografía se configura en dos niveles:
-
-#### 1. Esquema de Fuentes
-
-Define qué familias tipográficas usar:
+### Esquemas de Fuentes
 
 ```json
 "typography": {
-  "fontScheme": "modern"  // elegant | modern | classic
-}
-```
-
-**Esquemas disponibles:**
-
-| Esquema | Fuente Títulos | Fuente Cuerpo |
-|---------|---------------|---------------|
-| `elegant` | Playfair Display | Inter |
-| `modern` | Inter (Bold) | Inter |
-| `classic` | Lora | Merriweather |
-
-#### 2. Colores de Texto (Opcional)
-
-Define colores específicos para diferentes tipos de texto:
-
-```json
-"typography": {
-  "fontScheme": "modern",
+  "fontScheme": "modern",  // elegant | modern | classic
   "colors": {
-    "heading": "#1a1a1a",  // Títulos (h1-h6)
-    "body": "#2d2d2d",     // Texto normal (p, span, div)
-    "muted": "#6b7280"     // Texto secundario (labels, captions)
+    "heading": "#1a1a1a",  // Opcional
+    "body": "#2d2d2d",
+    "muted": "#6b7280"
   }
 }
 ```
 
-### Valores por Defecto
+**Esquemas**:
+- **elegant**: Playfair Display + Inter
+- **modern**: Inter (bold) + Inter
+- **classic**: Lora + Merriweather
 
-Si **NO** se especifican colores de texto, el sistema usa estos valores optimizados para legibilidad:
+### Colores de Texto (Opcional)
 
+Si NO se especifican, usa defaults optimizados:
 ```javascript
-const defaults = {
-  heading: "oklch(0.17 0.01 60)",  // Casi negro (muy oscuro)
-  body: "oklch(0.25 0.01 60)",     // Gris muy oscuro
+{
+  heading: "oklch(0.17 0.01 60)",  // Casi negro
+  body: "oklch(0.25 0.01 60)",     // Gris oscuro
   muted: "oklch(0.50 0.01 60)"     // Gris medio
 }
 ```
 
-### Aplicación de Colores de Texto
-
-El sistema aplica automáticamente estos colores mediante CSS:
-
+**Aplicación CSS**:
 ```css
-/* Títulos siempre usan el color de heading */
-h1, h2, h3, h4, h5, h6 {
-  color: var(--heading-color) !important;
-}
-
-/* Texto general usa el color de body */
-body, p, span, div {
-  color: var(--body-text-color);
-}
-
-/* Texto secundario */
-.text-muted-foreground {
-  color: var(--muted-text-color) !important;
-}
+h1, h2, h3, h4, h5, h6 { color: var(--heading-color) !important; }
+body, p, span { color: var(--body-text-color); }
+.text-muted-foreground { color: var(--muted-text-color) !important; }
 ```
 
 ---
 
 ## Contraste y Legibilidad
 
-### Reglas de Contraste Automático
+### Contraste Automático
 
-El sistema implementa reglas inteligentes para garantizar legibilidad:
-
-#### 1. Texto en Botones
-
-Los botones **siempre** tienen texto con contraste óptimo:
+El sistema calcula contraste automáticamente:
 
 ```javascript
-// Si el fondo es oscuro → texto blanco
-// Si el fondo es claro → texto oscuro
+// Fondo oscuro → texto blanco
+// Fondo claro → texto oscuro
 
 function getContrastingForeground(backgroundHex) {
   const isDark = calculateLuminance(backgroundHex) < 0.5
@@ -170,75 +106,42 @@ function getContrastingForeground(backgroundHex) {
 }
 ```
 
-**Ejemplo práctico:**
-
+**Ejemplo**:
 ```jsx
-// Botón con fondo azul oscuro (#0066CC)
 <Button className="bg-primary text-primary-foreground">
-  Comprar  {/* ← Texto BLANCO automáticamente */}
-</Button>
-
-// Botón con fondo claro (#F0F7FF)
-<Button className="bg-secondary text-secondary-foreground">
-  Ver más  {/* ← Texto OSCURO automáticamente */}
+  Comprar  {/* Texto contrasta automáticamente */}
 </Button>
 ```
 
-#### 2. Texto sobre Fondos
+### WCAG 2.1 Guidelines
 
-- **Fondo claro** (`background`): Texto oscuro por defecto
-- **Fondo oscuro**: Texto claro por defecto
-- **Tarjetas** (`card`): Texto adaptado al fondo
-
-#### 3. Cálculo de Luminosidad
-
-```javascript
-// Fórmula W3C para luminosidad relativa
-const luminance = 0.2126 * R + 0.7152 * G + 0.0722 * B
-
-// Umbral de oscuridad
-const isDark = luminance < 0.5
-```
-
-### Niveles de Contraste
-
-El proyecto sigue las **WCAG 2.1 Guidelines**:
-
-- **AA Normal**: Ratio mínimo 4.5:1 (texto normal)
-- **AA Large**: Ratio mínimo 3:1 (texto grande)
-- **AAA**: Ratio mínimo 7:1 (óptimo)
+- **AA Normal**: Ratio 4.5:1 (texto normal)
+- **AA Large**: Ratio 3:1 (texto grande)
+- **AAA**: Ratio 7:1 (óptimo)
 
 ---
 
-## Clases de Tailwind CSS
+## Clases Tailwind
 
 ### Colores de Fondo
 
 ```jsx
-className="bg-background"    // Fondo del sitio
-className="bg-primary"       // Fondo color principal
-className="bg-secondary"     // Fondo color secundario
-className="bg-accent"        // Fondo color de acento
-className="bg-card"          // Fondo de tarjetas
+className="bg-background"    // Fondo sitio
+className="bg-primary"       // Principal
+className="bg-secondary"     // Secundario
+className="bg-accent"        // Acento
 ```
 
 ### Colores de Texto
 
 ```jsx
-className="text-foreground"        // Texto principal
-className="text-primary"           // Texto color principal
-className="text-muted-foreground"  // Texto secundario
-className="text-primary-foreground" // Texto sobre primary
+className="text-foreground"        // Principal
+className="text-primary"           // Color primary
+className="text-muted-foreground"  // Secundario
+className="text-primary-foreground" // Sobre primary
 ```
 
-### Bordes
-
-```jsx
-className="border border-border"   // Borde sutil
-className="border-primary"         // Borde color principal
-```
-
-### Ejemplos Combinados
+### Ejemplos
 
 ```jsx
 // Botón primario
@@ -246,172 +149,100 @@ className="border-primary"         // Borde color principal
   Añadir al Carrito
 </Button>
 
-// Tarjeta con borde
+// Tarjeta
 <Card className="bg-card text-card-foreground border-border">
   <h3 className="text-foreground">Título</h3>
   <p className="text-muted-foreground">Descripción</p>
 </Card>
 
-// Badge de acento
-<Badge className="bg-accent text-accent-foreground">
-  Nuevo
-</Badge>
+// Badge
+<Badge className="bg-accent text-accent-foreground">Nuevo</Badge>
 ```
 
 ---
 
-## Componentes y Estilos
+## Componentes UI
 
-### Componentes UI Base
-
-Todos los componentes están en `components/ui/` y siguen el sistema de tokens:
-
-#### Button
+### Button
 
 ```jsx
-import { Button } from "@/components/ui/button"
-
-// Variantes disponibles
-<Button variant="default">Default</Button>    // bg-primary
+<Button variant="default">Default</Button>     // bg-primary
 <Button variant="secondary">Secondary</Button> // bg-secondary
-<Button variant="outline">Outline</Button>     // border-primary
-<Button variant="ghost">Ghost</Button>         // sin fondo
-<Button variant="destructive">Delete</Button>  // rojo
+<Button variant="outline">Outline</Button>     // border
+<Button variant="ghost">Ghost</Button>         // transparente
 ```
 
-#### Card
+### Card
 
 ```jsx
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-
 <Card>
   <CardHeader>
     <CardTitle>Título</CardTitle>
   </CardHeader>
-  <CardContent>
-    Contenido
-  </CardContent>
+  <CardContent>Contenido</CardContent>
 </Card>
 ```
 
-#### Badge
+### Badge
 
 ```jsx
-import { Badge } from "@/components/ui/badge"
-
 <Badge variant="default">Badge</Badge>
 <Badge variant="secondary">Badge</Badge>
 <Badge variant="outline">Badge</Badge>
 ```
 
-### Componentes Personalizados
-
-#### ProductCard
-
-```jsx
-// components/product-card.tsx
-<ProductCard product={product} />
-```
-
-Estilo:
-- Fondo: `bg-card`
-- Texto: `text-card-foreground`
-- Precio: `text-primary` (destacado)
-- Stock: `text-muted-foreground`
-
-#### Header
-
-```jsx
-// components/header.tsx
-<Header />
-```
-
-Estilo:
-- Fondo: `bg-background/95` (semi-transparente)
-- Links: `hover:text-primary`
-- Badge carrito: `bg-primary text-primary-foreground`
-
 ---
 
 ## Mejores Prácticas
 
-### 1. Colores de Texto
+### 1. Usar Colores Semánticos
 
-✅ **Hacer:**
+✅ **Hacer**:
 ```jsx
-// Usar colores semánticos
 <h2 className="text-foreground">Título</h2>
 <p className="text-muted-foreground">Subtítulo</p>
 ```
 
-❌ **Evitar:**
+❌ **Evitar**:
 ```jsx
-// NO usar colores hardcoded
 <h2 className="text-gray-900">Título</h2>
 <p className="text-gray-500">Subtítulo</p>
 ```
 
-### 2. Botones
+### 2. Contraste Automático en Botones
 
-✅ **Hacer:**
+✅ **Hacer**:
 ```jsx
-// El texto contrasta automáticamente
-<Button className="bg-primary text-primary-foreground">
-  Click aquí
-</Button>
+<Button className="bg-primary text-primary-foreground">Click</Button>
 ```
 
-❌ **Evitar:**
+❌ **Evitar**:
 ```jsx
-// NO forzar colores de texto manualmente
-<Button className="bg-primary text-white">
-  Click aquí
-</Button>
+<Button className="bg-primary text-white">Click</Button>
 ```
 
-### 3. Fondos con Transparencia
+### 3. Opacidad
 
-✅ **Hacer:**
 ```jsx
-// Usar opacidad con /
-<div className="bg-primary/10 text-primary">
-  Fondo sutil
-</div>
+<div className="bg-primary/10 text-primary">Fondo sutil</div>
 ```
 
 ### 4. Hover States
 
-✅ **Hacer:**
 ```jsx
-// Usar /90 para hover
-<Button className="bg-primary hover:bg-primary/90">
-  Hover suave
-</Button>
+<Button className="bg-primary hover:bg-primary/90">Hover suave</Button>
 ```
 
-### 5. Mínimo de Colores de Texto
+### 5. Limitar Colores de Texto
 
-**Limitarse a 2-3 tipos de colores de texto:**
-
-1. **Heading** - Títulos principales (muy oscuro)
+Usar solo 2-3 tipos:
+1. **Heading** - Títulos (muy oscuro)
 2. **Body** - Texto normal (oscuro)
-3. **Muted** - Texto secundario (gris medio)
-
-**Razón**: Demasiados colores crean inconsistencia visual y dificultan la lectura.
-
-### 6. Excepciones de Color
-
-La única excepción para texto claro es:
-
-- Botones con fondo oscuro
-- Badges con fondo oscuro
-- Headers con fondo oscuro
-
-En todos los casos, el sistema aplica **automáticamente** `text-primary-foreground` (blanco).
+3. **Muted** - Secundario (gris)
 
 ---
 
-## Modificar Colores en Producción
+## Modificar Colores
 
 ### Paso 1: Editar store-config.json
 
@@ -419,16 +250,14 @@ En todos los casos, el sistema aplica **automáticamente** `text-primary-foregro
 {
   "branding": {
     "colorScheme": {
-      "name": "nuevo-tema",
-      "primary": "#FF5733",      // Nuevo color principal
+      "primary": "#FF5733",      // Nuevo
       "secondary": "#FFFFFF",
       "accent": "#FFC300",
       "background": "#FFF5E1"
     },
     "typography": {
-      "fontScheme": "elegant",
       "colors": {
-        "heading": "#2c2c2c",    // Opcional: personalizar
+        "heading": "#2c2c2c",    // Opcional
         "body": "#3a3a3a",
         "muted": "#757575"
       }
@@ -437,36 +266,32 @@ En todos los casos, el sistema aplica **automáticamente** `text-primary-foregro
 }
 ```
 
-### Paso 2: Recargar la Aplicación
+### Paso 2: Recargar
 
-Los colores se aplican automáticamente al cargar la página. No requiere rebuild.
+Colores se aplican automáticamente. No requiere rebuild.
 
 ### Paso 3: Verificar Contraste
 
-Usa herramientas como:
+Herramientas:
 - [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
 - [Coolors Contrast Checker](https://coolors.co/contrast-checker)
 
 ---
 
-## Debugging de Colores
+## Debugging
 
-### Ver Variables CSS Aplicadas
+### Ver Variables CSS
 
-Abre DevTools > Elements > Computed > Filter "color":
-
+DevTools > Elements > Computed:
 ```css
 :root {
   --background: oklch(0.97 0.005 60);
   --primary: oklch(0.543 0.156 251.234);
   --foreground: oklch(0.25 0.01 60);
-  ...
 }
 ```
 
 ### Verificar DynamicColorProvider
-
-El componente inyecta un `<style>` con id `dynamic-theme-colors`:
 
 ```html
 <head>
@@ -479,63 +304,38 @@ El componente inyecta un `<style>` con id `dynamic-theme-colors`:
 </head>
 ```
 
-Si este `<style>` no aparece, revisar:
-1. `DynamicColorProvider` está en `layout.tsx`
-2. `store-config.json` se lee correctamente
+Si no aparece:
+1. `DynamicColorProvider` en `layout.tsx`
+2. `store-config.json` válido
 3. No hay errores en consola
 
 ---
 
 ## Solución de Problemas
 
-### Los colores no se aplican
+### Colores no se aplican
 
-**Causas comunes:**
-
-1. **Colores hardcoded en componentes**
-   - Solución: Reemplazar con clases semánticas (`text-foreground`, `bg-primary`)
-
-2. **CSS con mayor especificidad**
-   - Solución: Usar `!important` o aumentar especificidad
-
-3. **store-config.json mal formateado**
-   - Solución: Validar JSON en [jsonlint.com](https://jsonlint.com/)
+**Causas**:
+1. Colores hardcoded → usar clases semánticas
+2. CSS con mayor especificidad → usar `!important`
+3. `store-config.json` mal formateado → validar JSON
 
 ### Texto ilegible
 
-**Causas comunes:**
-
-1. **Colores de texto no configurados**
-   - Solución: Añadir `typography.colors` en store-config.json
-
-2. **Contraste insuficiente**
-   - Solución: Elegir colores con mayor diferencia de luminosidad
-
-3. **Fondo y texto del mismo color**
-   - Solución: Verificar que `getContrastingForeground()` funciona correctamente
+**Causas**:
+1. Colores no configurados → agregar `typography.colors`
+2. Contraste insuficiente → elegir colores con más diferencia
+3. Fondo y texto iguales → verificar `getContrastingForeground()`
 
 ---
 
-## Recursos Adicionales
+## Recursos
 
 - [OKLCH Color Picker](https://oklch.com/)
-- [Tailwind CSS Colors](https://tailwindcss.com/docs/customizing-colors)
-- [shadcn/ui Components](https://ui.shadcn.com/)
+- [Tailwind CSS](https://tailwindcss.com/docs/customizing-colors)
+- [shadcn/ui](https://ui.shadcn.com/)
 - [WCAG Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 
 ---
 
-## Conclusión
-
-El sistema de estilos del template está diseñado para:
-
-✅ Ser completamente configurable sin tocar código
-✅ Garantizar legibilidad automática
-✅ Mantener consistencia visual
-✅ Permitir personalización total
-✅ Seguir estándares de accesibilidad
-
-Para dudas o problemas, consulta los archivos:
-- `lib/color-utils.ts` (lógica de conversión)
-- `components/dynamic-color-provider.tsx` (aplicación de colores)
-- `app/globals.css` (variables CSS base)
+**Última actualización**: 2025-10-15
