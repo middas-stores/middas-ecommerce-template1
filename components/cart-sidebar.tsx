@@ -18,6 +18,7 @@ export function CartSidebar() {
 
   const formatPrice = (price: number | undefined) => {
     const safePrice = price || 0
+    if (safePrice === 0) return "Precio a consultar"
     if (!config) return safePrice.toString()
     return `${config.settings.currencySymbol}${safePrice.toLocaleString("es-AR")}`
   }
@@ -108,6 +109,11 @@ export function CartSidebar() {
                 <div className="mb-4 flex items-center justify-between text-lg font-semibold">
                   <span>Total:</span>
                   <span>{formatPrice(totalPrice)}</span>
+                </div>
+                <div className="mb-3 rounded-md bg-muted p-3">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Este es un catálogo informativo. Los precios y disponibilidad se confirmarán al momento de realizar tu pedido por WhatsApp.
+                  </p>
                 </div>
                 <Button className="w-full" size="lg" onClick={handleWhatsAppOrder}>
                   Realizar Pedido por WhatsApp

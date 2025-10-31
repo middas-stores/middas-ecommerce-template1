@@ -23,6 +23,7 @@ export function ProductCard({ product }: ProductCardProps) {
   }, [])
 
   const formatPrice = (price: number) => {
+    if (price === 0) return "Precio a consultar"
     if (!config) return price.toString()
     return `${config.settings.currencySymbol}${price.toLocaleString("es-AR")}`
   }
@@ -45,11 +46,14 @@ export function ProductCard({ product }: ProductCardProps) {
           {config?.settings.showStock && <span className="text-xs text-muted-foreground">Stock: {product.stock}</span>}
         </div>
       </CardContent>
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-4 pt-0 flex flex-col gap-2">
         <Button className="w-full" onClick={() => addItem(product)} disabled={product.stock === 0}>
           <ShoppingCart className="mr-2 h-4 w-4" />
           Agregar al carrito
         </Button>
+        <p className="text-[10px] text-muted-foreground text-center leading-tight">
+          Stock y precios sujetos a disponibilidad. Imágenes ilustrativas.
+        </p>
       </CardFooter>
     </Card>
   )
