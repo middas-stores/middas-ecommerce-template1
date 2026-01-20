@@ -1,6 +1,6 @@
 {
   "storeId": "68e03cde5f3018eaef75750b",
-  "apiUrl": "http://localhost:5000",
+  "apiUrl": "http://localhost:8086",
   "business": {
     "socialMedia": {
       "instagram": "https://www.instagram.com/eldiscoinsumos",

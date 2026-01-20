@@ -13,8 +13,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addItem } = useCart()
+  const { addItem, getItemQuantity } = useCart()
   const [config, setConfig] = useState<StoreConfig | null>(null)
+  const quantityInCart = getItemQuantity(product.id)
+  const isOutOfStock = product.stock === 0
+  const isMaxStock = quantityInCart >= product.stock
 
   useEffect(() => {
     fetch("/config/store-config.json")
@@ -47,9 +50,9 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex flex-col gap-2">
-        <Button className="w-full" onClick={() => addItem(product)} disabled={product.stock === 0}>
+        <Button className="w-full" onClick={() => addItem(product)} disabled={isOutOfStock || isMaxStock}>
           <ShoppingCart className="mr-2 h-4 w-4" />
-          Agregar al carrito
+          {isOutOfStock ? "Sin stock" : isMaxStock ? "Stock máximo alcanzado" : "Agregar al carrito"}
         </Button>
         <p className="text-[10px] text-muted-foreground text-center leading-tight">
           Stock y precios sujetos a disponibilidad. Imágenes ilustrativas.
